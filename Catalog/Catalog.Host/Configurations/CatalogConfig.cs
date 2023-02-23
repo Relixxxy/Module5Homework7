@@ -1,5 +1,3 @@
-using Infrastructure.Identity;
-
 namespace Catalog.Host.Configurations;
 
 public class CatalogConfig
