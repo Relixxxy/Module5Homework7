@@ -1,8 +1,11 @@
-using Basket.Host.Configurations;
 using Basket.Host.Services;
 using Basket.Host.Services.Interfaces;
 using Infrastructure.Extensions;
 using Infrastructure.Filters;
+using Infrastructure.RateLimit.Configurations;
+using Infrastructure.RateLimit.Filtres;
+using Infrastructure.RateLimit.Services;
+using Infrastructure.RateLimit.Services.Interfaces;
 using Microsoft.OpenApi.Models;
 
 var configuration = GetConfiguration();
@@ -12,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(options =>
     {
         options.Filters.Add(typeof(HttpGlobalExceptionFilter));
+        options.Filters.Add(typeof(RateLimitFilter));
     })
     .AddJsonOptions(options => options.JsonSerializerOptions.WriteIndented = true);
 

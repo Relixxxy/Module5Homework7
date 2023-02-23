@@ -11,7 +11,9 @@ services:
       - ASPNETCORE_URLS=http://+:5003
       - Authorization__Authority=http://www.alevelwebsite.com:5002
       - Redis__Host=www.alevelwebsite.com:6380
-      - Redis__CacheTimeout=00:00:10
+      - Redis__CacheTimeout=01:00:00
+      - Redis__RequestsTimeout=00:01:00
+      - Redis__RequestsLimit=10
       - PathBase=http://www.alevelwebsite.com:5003
     depends_on:
       - redis
@@ -27,6 +29,10 @@ services:
        - ASPNETCORE_URLS=http://+:5000
        - ConnectionString=server=www.alevelwebsite.com;port=5433;database=catalog;uid=postgres;password=postgres;
        - Authorization__Authority=http://www.alevelwebsite.com:5002
+       - Redis__Host=www.alevelwebsite.com:6380
+       - Redis__CacheTimeout=01:00:00
+       - Redis__RequestsTimeout=00:01:00
+       - Redis__RequestsLimit=10
        - PathBase=http://www.alevelwebsite.com:5000
     depends_on:
       - postgres

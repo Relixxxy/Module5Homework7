@@ -7,7 +7,12 @@ using Catalog.Host.Services;
 using Catalog.Host.Services.Interfaces;
 using Infrastructure.Extensions;
 using Infrastructure.Filters;
+using Infrastructure.RateLimit.Configurations;
+using Infrastructure.RateLimit.Middleware;
+using Infrastructure.RateLimit.Services;
+using Infrastructure.RateLimit.Services.Interfaces;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 var configuration = GetConfiguration();
 
@@ -41,7 +46,6 @@ builder.Services.AddSwaggerGen(options =>
                 Scopes = new Dictionary<string, string>()
                 {
                     { "mvc", "website" },
-                    { "catalog.catalogbff", "catalog.catalogbff" },
                     { "catalog.catalogitem", "catalog.catalogitem" }
                 }
             }
@@ -53,6 +57,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.AddConfiguration();
 builder.Services.Configure<CatalogConfig>(configuration);
+builder.Services.Configure<RedisConfig>(
+    builder.Configuration.GetSection("Redis"));
 
 builder.Services.AddAuthorization(configuration);
 
@@ -61,6 +67,9 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddTransient<ICatalogItemRepository, CatalogItemRepository>();
 builder.Services.AddTransient<ICatalogService, CatalogService>();
 builder.Services.AddTransient<ICatalogItemService, CatalogItemService>();
+
+builder.Services.AddTransient<IRedisCacheConnectionService, RedisCacheConnectionService>();
+builder.Services.AddScoped<RateLimitMiddleware>();
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(opts => opts.UseNpgsql(configuration["ConnectionString"]));
 builder.Services.AddScoped<IDbContextWrapper<ApplicationDbContext>, DbContextWrapper<ApplicationDbContext>>();
@@ -91,6 +100,8 @@ app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseMiddleware<RateLimitMiddleware>();
 
 app.UseEndpoints(endpoints =>
 {
